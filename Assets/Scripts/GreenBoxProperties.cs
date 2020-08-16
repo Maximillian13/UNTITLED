@@ -13,6 +13,9 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 	private Rigidbody rig;
 	private Collider boxCol;
 	private InteractableObject io;
+	private SpriteRenderer[] numbersSprites;
+
+	private bool leftStartBox;
 
 	private Vector3 startingPosition;
 	private int counter;
@@ -34,6 +37,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 		boxCol = this.GetComponent<Collider>();
 		io = this.GetComponent<InteractableObject>();
 		startingPosition = this.transform.position;
+		numbersSprites = this.GetComponentsInChildren<SpriteRenderer>();
 	}
 
 	void FixedUpdate()
@@ -48,6 +52,12 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
 			mr.materials[1].color = new Color(mr.materials[1].color.r, mr.materials[1].color.g, mr.materials[1].color.b, a);
+
+			for (int i = 0; i < numbersSprites.Length; i++)
+			{
+				if (numbersSprites[i] != null)
+					numbersSprites[i].color = new Color(1, 1, 1, a);
+			}
 
 			t += Time.deltaTime;
 			if (t / duration >= 1.3f) 
@@ -76,6 +86,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 			leaveSound.Play();
 			hum.Play();
 		}
+		leftStartBox = true;
 		return;
 	}
 
@@ -92,6 +103,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 				desSound.Play();
 			if (io != null)
 			{
+				io.TurnOffTrail();
 				io.EndInteraction();
 				io.enabled = false;
 			}
@@ -127,4 +139,9 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
     {
         connectedSticky = ybp;
     }
+
+	public bool LeftStartBox()
+	{
+		return leftStartBox;
+	}
 }

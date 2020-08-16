@@ -12,6 +12,8 @@ public class CubeRespawner : MonoBehaviour
 	public bool pink;
 	public bool yellow;
 	public bool lightBlue;
+	public bool black;
+	public bool white;
 	public float maxDistance;
     public Vector3 startForce;
 	private float somethingInsideSpawnAreaTimer;
@@ -32,19 +34,24 @@ public class CubeRespawner : MonoBehaviour
         // What cube to spawn
 		if (green == true)
 			boxName = "Cube Green";
-		if (blue == true)
+		else if (blue == true)
 			boxName = "Cube Blue";
-		if (red == true)
+		else if(red == true)
 			boxName = "Cube Red";
-		if (orange == true)
+		else if(orange == true)
 			boxName = "Cube Orange";
-		if (pink == true)
+		else if(pink == true)
 			boxName = "Cube Pink";
-		if (yellow == true)
+		else if(yellow == true)
 			boxName = "Cube Yellow";
-		if (lightBlue == true)
+		else if(lightBlue == true)
 			boxName = "Cube LightBlue";
-		CreateNewCube();
+		else if(black == true)
+			boxName = "Cube Black";
+		else if(white == true)
+			boxName = "Cube White";
+
+		this.CreateNewCube();
 	}
 
 	// Update is called once per frame
@@ -56,11 +63,11 @@ public class CubeRespawner : MonoBehaviour
 			if (curDist > maxDistance)
 			{
 				boxProperties.DestroyBox(false);
-				CreateNewCube();
+				this.CreateNewCube();
 			}
 		}
 		else
-			CreateNewCube();
+			this.CreateNewCube();
 
 		if(spawningIn == true)
 		{
@@ -93,6 +100,9 @@ public class CubeRespawner : MonoBehaviour
 
 	void OnTriggerStay(Collider other)
 	{
+		// Only sphere Collider is the grav cubes which is trigger
+		if (other.GetType() == typeof(SphereCollider))
+			return;
 		somethingInsideSpawnAreaTimer = Time.time + .25f;
 	}
 

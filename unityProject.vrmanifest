@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.untitled.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "D:\\Projects\\a-old\\UNTITLED_Steam_Version\\UNTITLED 5-18-17\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "UNTITLED [Testing]"
+        }
+      }
+    }
+  ]
+}

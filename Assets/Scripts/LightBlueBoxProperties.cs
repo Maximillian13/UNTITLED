@@ -12,10 +12,13 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 	private Rigidbody rig;
 	private BoxCollider boxCol;
 	private MeshRenderer mr;
+	private SpriteRenderer[] numbersSprites;
 
 	public Transform hands;
 	private bool active;
 	private float comeBackTimer;
+
+	private bool leftStartBox;
 
 	private float strengthMultiplyer = 1.5f;
 	private float timer = 3;
@@ -37,6 +40,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 		boxCol = this.GetComponent<BoxCollider>();
 		startingPosition = this.transform.position;
 		//hands = GameObject.FindWithTag("Hands").transform;
+		numbersSprites = this.GetComponentsInChildren<SpriteRenderer>();
 	}
 
 	void FixedUpdate()
@@ -62,7 +66,11 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
 			mr.materials[1].color = new Color(mr.materials[1].color.r, mr.materials[1].color.g, mr.materials[1].color.b, a);
-
+			for (int i = 0; i < numbersSprites.Length; i++)
+			{
+				if (numbersSprites[i] != null)
+					numbersSprites[i].color = new Color(1, 1, 1, a);
+			}
 			t += Time.deltaTime;
 			if (t / duration >= 1.3f)
 				Destroy(this.gameObject);
@@ -106,8 +114,11 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 				desSound.Play();
 
             InteractableObject io = this.GetComponent<InteractableObject>();
-            if (io != null)
-                this.GetComponent<InteractableObject>().EndInteraction();
+			if (io != null)
+			{
+				io.EndInteraction();
+				io.TurnOffTrail();
+			}
 
 			Material[] ms = new Material[2];
 			ms[0] = Resources.Load<Material>("Materials/Cube Rim");
@@ -141,4 +152,9 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
     {
         connectedSticky = ybp;
     }
+
+	public bool LeftStartBox()
+	{
+		return leftStartBox;
+	}
 }

@@ -14,9 +14,12 @@ public class YellowBoxProperties : MonoBehaviour, IBoxProperties
 	private BoxCollider boxCol;
 	private InteractableObject io;
 	private bool active;
+	private SpriteRenderer[] numbersSprites;
 
 	private Vector3 startingPosition;
 	private int counter;
+
+	private bool leftStartBox;
 
 	// For fading out the box
 	private MeshRenderer mr;
@@ -39,6 +42,7 @@ public class YellowBoxProperties : MonoBehaviour, IBoxProperties
 		mr = this.GetComponent<MeshRenderer>();
 		stickyBox.enabled = false;
 		startingPosition = this.transform.position;
+		numbersSprites = this.GetComponentsInChildren<SpriteRenderer>();
 	}
 
 	void FixedUpdate()
@@ -49,7 +53,11 @@ public class YellowBoxProperties : MonoBehaviour, IBoxProperties
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
 			mr.materials[1].color = new Color(mr.materials[1].color.r, mr.materials[1].color.g, mr.materials[1].color.b, a);
-
+			for (int i = 0; i < numbersSprites.Length; i++)
+			{
+				if (numbersSprites[i] != null)
+					numbersSprites[i].color = new Color(1, 1, 1, a);
+			}
 			t += Time.deltaTime;
 			if (t / duration >= 1.3f) 
 				Destroy(this.gameObject);
@@ -104,6 +112,7 @@ public class YellowBoxProperties : MonoBehaviour, IBoxProperties
 			leaveSound.Play();
 			hum.Play();
 		}
+		leftStartBox = true;
 		stickyBox.enabled = true;
 		active = true;
 	}
@@ -121,6 +130,7 @@ public class YellowBoxProperties : MonoBehaviour, IBoxProperties
             if (playSound == true)
 				desSound.Play();
 			DestroyFJConnections();
+			io.TurnOffTrail();
             io.EndInteraction();
 			io.enabled = false;
 
@@ -166,4 +176,9 @@ public class YellowBoxProperties : MonoBehaviour, IBoxProperties
     {
         connectedSticky = ybp;
     }
+
+	public bool LeftStartBox()
+	{
+		return leftStartBox;
+	}
 }

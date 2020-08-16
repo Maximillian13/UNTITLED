@@ -27,7 +27,7 @@ public class StartingTable : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.tag == "Box") // If its the box leaving
+		if (other.tag == "Box" && other.GetType() == typeof(BoxCollider)) // If its the box leaving
 		{
 			if (other.GetComponent<BoxInformation>().LeftTheStart == true)
 			{
@@ -43,7 +43,7 @@ public class StartingTable : MonoBehaviour
 	// When you take a box out
 	void OnTriggerExit(Collider other)
 	{
-		if(other.tag == "Box") // If its the box leaving
+		if(other.tag == "Box" && other.GetType() == typeof(BoxCollider)) // If its the box leaving
 		{
 			for (int x = 0; x < boxes.Length; x++) // run through all the boxes
 			{

@@ -10,4 +10,5 @@ public interface IBoxProperties
 	void OnBoxRelease(Transform wand);
 	void OnBoxGrab();
     void ConnectedToSticky(YellowBoxProperties ybp);
+	bool LeftStartBox();
 }

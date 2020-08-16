@@ -10,6 +10,9 @@ public class LevelControl : MonoBehaviour
 	public bool multiRecepticle;
 	private bool multiRecDone;
 	private float timer;
+	private bool fadingWhite;
+	private float fadingWhiteTimer;
+	private EyeFadeControl eyeFade;
 
 	void Start()
 	{
@@ -54,12 +57,26 @@ public class LevelControl : MonoBehaviour
 				return;
 		}
 
-		// If we are here then everything is done so load the next level if there is one
-		int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
-		if (SceneManager.sceneCountInBuildSettings > nextScene)
-			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-		else
-			SceneManager.LoadScene(nextScene - 1);
+		// Get and start fade
+		if(eyeFade == null)
+		{
+			eyeFade = GameObject.Find("[CameraRig]").transform.Find("Camera").Find("EyeCover").GetComponent<EyeFadeControl>();
+			eyeFade.FadeWhite();
+		}
+		
+		// After fade load level
+		fadingWhiteTimer += Time.deltaTime;
+		if (fadingWhiteTimer > .6f)
+		{
+			// If we are here then everything is done so load the next level if there is one
+			int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
+			if (SceneManager.sceneCountInBuildSettings > nextScene)
+				SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+			else
+				SceneManager.LoadScene(nextScene - 1);
+		}
+
+
 	}
 
 

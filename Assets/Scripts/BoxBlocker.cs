@@ -49,7 +49,8 @@ public class BoxBlocker : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if(other.tag == "Box")
+		// Ignore sphere collider on black box 
+		if (other.tag == "Box" && other.GetType() == typeof(BoxCollider)) 
 		{
 			// Get the speed of the box and determine if it should be destroyed or not
 			Rigidbody rig = other.GetComponent<Rigidbody>();

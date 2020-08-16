@@ -18,6 +18,9 @@ public class SpecailRecepticle : MonoBehaviour
 
 	private AudioSource clip;
 
+	private float fadingWhiteTimer;
+	private EyeFadeControl eyeFade;
+
 
 	// Use this for initialization
 	void Start()
@@ -37,7 +40,17 @@ public class SpecailRecepticle : MonoBehaviour
 			t += Time.deltaTime;
 			if (mat.color.a <= 0)
 			{
-				SceneManager.LoadScene(levelToLoad);
+				// Get and start fade
+				if (eyeFade == null)
+				{
+					eyeFade = GameObject.Find("[CameraRig]").transform.Find("Camera").Find("EyeCover").GetComponent<EyeFadeControl>();
+					eyeFade.FadeWhite();
+				}
+
+				// After fade load level
+				fadingWhiteTimer += Time.deltaTime;
+				if (fadingWhiteTimer > .3f)
+					SceneManager.LoadScene(levelToLoad);
 			}
 		}
 	}

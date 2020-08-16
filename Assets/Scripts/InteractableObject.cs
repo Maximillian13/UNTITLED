@@ -21,6 +21,7 @@ public class InteractableObject : MonoBehaviour
 
 	private MeshRenderer mr;
 	private Material cubeColor;
+	private bool noTrail;
 
 
 	// Use this for initialization
@@ -41,36 +42,28 @@ public class InteractableObject : MonoBehaviour
 	void Update () 
     {
 		if(ridge.IsSleeping() == true)
-		{
 			ridge.WakeUp();
-		}
+
         // If you are holding something
 	    if(currentlyInteracting == true)
         {
-            KeepInHand(attachedWand);
+            this.KeepInHand(attachedWand);
 			tr.enabled = false;
 		}
 		else
 		{
-			if (Mathf.Abs(ridge.velocity.magnitude) > 3)
-			{
-				tr.enabled = true;
-			}
+			tr.enabled = !noTrail;
+			float speed = Mathf.Abs(ridge.velocity.magnitude);
+			if (speed > 3)
+				tr.time = .5f;
 			else
-			{
-				tr.enabled = false;
-			}
+				tr.time = speed * .05f;
+
 		}
 	}
 
     private void KeepInHand(WandControlGeneralInteraction normWand)
     {
-		if (normWand.TestConnection() == false)
-		{
-			EndInteraction();
-			return;
-		}
-
 		// Set the position based on where the wand is
 		posDelta = normWand.transform.position - interactionPoint.position;
         if (Mathf.Abs(posDelta.x) > .5f || Mathf.Abs(posDelta.y) > .5f || Mathf.Abs(posDelta.z) > .5f)
@@ -123,8 +116,10 @@ public class InteractableObject : MonoBehaviour
             // Detach wand
             attachedWand = null;
             currentlyInteracting = false;
+			wand.DropBox();
 			boxProp.OnBoxRelease(wand.transform);
 		}
+
     }
 
 	public void EndInteraction()
@@ -146,15 +141,8 @@ public class InteractableObject : MonoBehaviour
 		return cubeColor;
 	}
 
-    public SteamVR_Controller.Device GetAttachedController()
-    {
-        if (attachedWand != null)
-        {
-            return attachedWand.GetController();
-        }
-        else
-        {
-            return null;
-        }
-    }
+	public void TurnOffTrail()
+	{
+		noTrail = true;
+	}
 }

@@ -1,9 +1,15 @@
 // The SteamManager is designed to work with Steamworks.NET
 // This file is released into the public domain.
 // Where that dedication is not recognized you are granted a perpetual,
-// irrevokable license to copy and modify this file as you see fit.
+// irrevocable license to copy and modify this file as you see fit.
 //
-// Version: 1.0.5
+// Version: 1.0.8
+
+#if UNITY_ANDROID || UNITY_IOS || UNITY_TIZEN || UNITY_TVOS || UNITY_WEBGL || UNITY_WSA || UNITY_PS4 || UNITY_WII || UNITY_XBOXONE || UNITY_SWITCH
+#define DISABLESTEAMWORKS
+#endif
+
+#if !DISABLESTEAMWORKS
 
 using UnityEngine;
 using System.Collections;
@@ -15,8 +21,8 @@ using Steamworks;
 //
 [DisallowMultipleComponent]
 public class SteamManager : MonoBehaviour {
-	private static SteamManager s_instance;
-	private static SteamManager Instance {
+	protected static SteamManager s_instance;
+	protected static SteamManager Instance {
 		get {
 			if (s_instance == null) {
 				return new GameObject("SteamManager").AddComponent<SteamManager>();
@@ -27,21 +33,21 @@ public class SteamManager : MonoBehaviour {
 		}
 	}
 
-	private static bool s_EverInialized;
+	protected static bool s_EverInitialized;
 
-	private bool m_bInitialized;
+	protected bool m_bInitialized;
 	public static bool Initialized {
 		get {
 			return Instance.m_bInitialized;
 		}
 	}
 
-	private SteamAPIWarningMessageHook_t m_SteamAPIWarningMessageHook;
-	private static void SteamAPIDebugTextHook(int nSeverity, System.Text.StringBuilder pchDebugText) {
+	protected SteamAPIWarningMessageHook_t m_SteamAPIWarningMessageHook;
+	protected static void SteamAPIDebugTextHook(int nSeverity, System.Text.StringBuilder pchDebugText) {
 		Debug.LogWarning(pchDebugText);
 	}
 
-	private void Awake() {
+	protected virtual void Awake() {
 		// Only one instance of SteamManager at a time!
 		if (s_instance != null) {
 			Destroy(gameObject);
@@ -49,7 +55,7 @@ public class SteamManager : MonoBehaviour {
 		}
 		s_instance = this;
 
-		if(s_EverInialized) {
+		if(s_EverInitialized) {
 			// This is almost always an error.
 			// The most common case where this happens is when SteamManager gets destroyed because of Application.Quit(),
 			// and then some Steamworks code in some other OnDestroy gets called afterwards, creating a new SteamManager.
@@ -74,33 +80,28 @@ public class SteamManager : MonoBehaviour {
 
 			// Once you get a Steam AppID assigned by Valve, you need to replace AppId_t.Invalid with it and
 			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
-			// See the Valve documentation for more information: https://partner.steamgames.com/documentation/drm#FAQ
+			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
 				Application.Quit();
 				return;
 			}
 		}
-		catch (System.DllNotFoundException e) { // We catch this exception here, as it will be the first occurence of it.
+		catch (System.DllNotFoundException e) { // We catch this exception here, as it will be the first occurrence of it.
 			Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + e, this);
 
 			Application.Quit();
 			return;
 		}
 
-		// Initialize the SteamAPI, if Init() returns false this can happen for many reasons.
-		// Some examples include:
-		// Steam Client is not running.
-		// Launching from outside of steam without a steam_appid.txt file in place.
-		// Running under a different OS User or Access level (for example running "as administrator")
-		// Ensure that you own a license for the AppId on your active Steam account
-		// If your AppId is not completely set up. Either in Release State: Unavailable, or if it's missing default packages.
+		// Initializes the Steamworks API.
+		// If this returns false then this indicates one of the following conditions:
+		// [*] The Steam client isn't running. A running Steam client is required to provide implementations of the various Steamworks interfaces.
+		// [*] The Steam client couldn't determine the App ID of game. If you're running your application from the executable or debugger directly then you must have a [code-inline]steam_appid.txt[/code-inline] in your game directory next to the executable, with your app ID in it and nothing else. Steam will look for this file in the current working directory. If you are running your executable from a different directory you may need to relocate the [code-inline]steam_appid.txt[/code-inline] file.
+		// [*] Your application is not running under the same OS user context as the Steam client, such as a different user or administration access level.
+		// [*] Ensure that you own a license for the App ID on the currently active Steam account. Your game must show up in your Steam library.
+		// [*] Your App ID is not completely set up, i.e. in Release State: Unavailable, or it's missing default packages.
 		// Valve's documentation for this is located here:
-		// https://partner.steamgames.com/documentation/getting_started
-		// https://partner.steamgames.com/documentation/example // Under: Common Build Problems
-		// https://partner.steamgames.com/documentation/bootstrap_stats // At the very bottom
-
-		// If you're running into Init issues try running DbgView prior to launching to get the internal output from Steam.
-		// http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx
+		// https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 		m_bInitialized = SteamAPI.Init();
 		if (!m_bInitialized) {
 			Debug.LogError("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
@@ -108,11 +109,11 @@ public class SteamManager : MonoBehaviour {
 			return;
 		}
 
-		s_EverInialized = true;
+		s_EverInitialized = true;
 	}
 
 	// This should only ever get called on first load and after an Assembly reload, You should never Disable the Steamworks Manager yourself.
-	private void OnEnable() {
+	protected virtual void OnEnable() {
 		if (s_instance == null) {
 			s_instance = this;
 		}
@@ -122,18 +123,17 @@ public class SteamManager : MonoBehaviour {
 		}
 
 		if (m_SteamAPIWarningMessageHook == null) {
-			// Set up our callback to recieve warning messages from Steam.
-			// You must launch with "-debug_steamapi" in the launch args to recieve warnings.
+			// Set up our callback to receive warning messages from Steam.
+			// You must launch with "-debug_steamapi" in the launch args to receive warnings.
 			m_SteamAPIWarningMessageHook = new SteamAPIWarningMessageHook_t(SteamAPIDebugTextHook);
 			SteamClient.SetWarningMessageHook(m_SteamAPIWarningMessageHook);
 		}
 	}
 
-
 	// OnApplicationQuit gets called too early to shutdown the SteamAPI.
 	// Because the SteamManager should be persistent and never disabled or destroyed we can shutdown the SteamAPI here.
 	// Thus it is not recommended to perform any Steamworks work in other OnDestroy functions as the order of execution can not be garenteed upon Shutdown. Prefer OnDisable().
-	private void OnDestroy() {
+	protected virtual void OnDestroy() {
 		if (s_instance != this) {
 			return;
 		}
@@ -147,7 +147,7 @@ public class SteamManager : MonoBehaviour {
 		SteamAPI.Shutdown();
 	}
 
-	private void Update() {
+	protected virtual void Update() {
 		if (!m_bInitialized) {
 			return;
 		}
@@ -156,3 +156,5 @@ public class SteamManager : MonoBehaviour {
 		SteamAPI.RunCallbacks();
 	}
 }
+
+#endif // !DISABLESTEAMWORKS

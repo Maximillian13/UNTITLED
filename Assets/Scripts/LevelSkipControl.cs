@@ -20,6 +20,9 @@ public class LevelSkipControl : MonoBehaviour
 	{
 		int levelsCompleted = PlayerPrefs.GetInt("Level");
 
+
+
+
 		if(levelsCompleted >= 1)
 		{
 			recepticles[0].SetActive(true);

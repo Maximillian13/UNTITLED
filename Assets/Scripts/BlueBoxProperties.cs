@@ -12,6 +12,9 @@ public class BlueBoxProperties : MonoBehaviour, IBoxProperties
 	private Rigidbody rig;
 	private BoxCollider boxCol;
 	private MeshRenderer mr;
+	private SpriteRenderer[] numbersSprites;
+
+	private bool leftStartBox;
 
 	private Vector3 startingPosition;
 	private int counter;
@@ -30,6 +33,8 @@ public class BlueBoxProperties : MonoBehaviour, IBoxProperties
 		mr = this.GetComponent<MeshRenderer>();
 		boxCol = this.GetComponent<BoxCollider>();
 		startingPosition = this.transform.position;
+
+		numbersSprites = this.GetComponentsInChildren<SpriteRenderer>();
 	}
 
 	void FixedUpdate()
@@ -40,6 +45,11 @@ public class BlueBoxProperties : MonoBehaviour, IBoxProperties
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
 			mr.materials[1].color = new Color(mr.materials[1].color.r, mr.materials[1].color.g, mr.materials[1].color.b, a);
+			for(int i = 0; i < numbersSprites.Length; i++)
+			{
+				if (numbersSprites[i] != null)
+					numbersSprites[i].color = new Color(1, 1, 1, a);
+			}
 
 			t += Time.deltaTime;
 			if (t / duration >= 1.3f) 
@@ -68,6 +78,7 @@ public class BlueBoxProperties : MonoBehaviour, IBoxProperties
 			hum.Play();
 		}
 		rig.useGravity = false;
+		leftStartBox = true;
 	}
 
 	/// <summary>
@@ -82,8 +93,11 @@ public class BlueBoxProperties : MonoBehaviour, IBoxProperties
             if (playSound == true)
 				desSound.Play();
             InteractableObject io = this.GetComponent<InteractableObject>();
-            if(io != null)
-                this.GetComponent<InteractableObject>().EndInteraction();
+			if (io != null)
+			{
+				io.EndInteraction();
+				io.TurnOffTrail();
+			}
 
 			Material[] ms = new Material[2];
 			ms[0] = Resources.Load<Material>("Materials/Cube Rim");
@@ -112,4 +126,9 @@ public class BlueBoxProperties : MonoBehaviour, IBoxProperties
     {
         connectedSticky = ybp;
     }
+
+	public bool LeftStartBox()
+	{
+		return leftStartBox;
+	}
 }
