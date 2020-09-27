@@ -26,7 +26,7 @@ public class PinkBoxProperties : MonoBehaviour, IBoxProperties
 	private float duration = 2;
 	float t;
 
-	private bool fade;
+	private bool fading;
 
     private YellowBoxProperties connectedSticky;
 
@@ -53,12 +53,13 @@ public class PinkBoxProperties : MonoBehaviour, IBoxProperties
 		}
 
 		// If the box is being destroyed have it fade out
-		if (fade == true)
+		if (fading == true)
 		{
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
 			mr.materials[1].color = new Color(mr.materials[1].color.r, mr.materials[1].color.g, mr.materials[1].color.b, a);
 			pointerBoxMR.material.color = new Color(pointerBoxMR.material.color.r, pointerBoxMR.material.color.b, pointerBoxMR.material.color.b, a);
+			rig.useGravity = false;
 			for (int i = 0; i < numbersSprites.Length; i++)
 			{
 				if (numbersSprites[i] != null)
@@ -101,7 +102,7 @@ public class PinkBoxProperties : MonoBehaviour, IBoxProperties
 	/// </summary>
 	public void DestroyBox(bool playSound)
 	{
-		if (fade == false)
+		if (fading == false)
 		{
             if (connectedSticky != null)
                 connectedSticky.DestroyFJConnections();
@@ -121,7 +122,7 @@ public class PinkBoxProperties : MonoBehaviour, IBoxProperties
 			mr.materials = ms;
 			pointerBoxMR.material = Resources.Load<Material>("Materials/Cube Pointer Fade");
 
-			fade = true;
+			fading = true;
 			boxCol.enabled = false;
 			active = false;
 			rig.velocity = Vector3.zero;
@@ -163,5 +164,10 @@ public class PinkBoxProperties : MonoBehaviour, IBoxProperties
 	public bool LeftStartBox()
 	{
 		return leftStartBox;
+	}
+
+	public bool Fading()
+	{
+		return fading;
 	}
 }

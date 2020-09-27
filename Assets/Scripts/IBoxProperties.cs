@@ -11,4 +11,5 @@ public interface IBoxProperties
 	void OnBoxGrab();
     void ConnectedToSticky(YellowBoxProperties ybp);
 	bool LeftStartBox();
+	bool Fading();
 }

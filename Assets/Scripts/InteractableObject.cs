@@ -127,7 +127,8 @@ public class InteractableObject : MonoBehaviour
 		// Detach wand
 		attachedWand = null;
 		currentlyInteracting = false;
-		boxProp.OnBoxRelease(null);
+		if(boxProp != null)
+			boxProp.OnBoxRelease(null);
 	}
 
     // If its already interacting

@@ -60,7 +60,7 @@ public class Recepticle : MonoBehaviour
 
 	void OnTriggerEnter(Collider other)
 	{
-		if(other.tag == "Box") // If it is the box
+		if(other.tag == "Box" && other.GetType() == typeof(BoxCollider)) // If it is the box
 		{
 			// If the box is the one we want
 			BoxInformation boxInfo = other.GetComponent<BoxInformation>();

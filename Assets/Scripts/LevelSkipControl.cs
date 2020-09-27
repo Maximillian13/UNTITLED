@@ -51,5 +51,10 @@ public class LevelSkipControl : MonoBehaviour
             recepticles[10].SetActive(true);
         if (levelsCompleted >= 101)
             recepticles[11].SetActive(true);
-    }
+		if (levelsCompleted >= 109)
+		{
+			recepticles[12].SetActive(true);
+			recepticles[13].SetActive(true);
+		}
+	}
 }

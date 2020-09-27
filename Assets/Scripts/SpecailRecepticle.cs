@@ -7,6 +7,7 @@ public class SpecailRecepticle : MonoBehaviour
 {
 	// The level to load
 	public int levelToLoad;
+	public bool specailLevels;
 
 	// For fading out
 	private Material mat;
@@ -50,7 +51,19 @@ public class SpecailRecepticle : MonoBehaviour
 				// After fade load level
 				fadingWhiteTimer += Time.deltaTime;
 				if (fadingWhiteTimer > .3f)
-					SceneManager.LoadScene(levelToLoad);
+				{
+					if (specailLevels == false)
+					{
+						SceneManager.LoadScene(levelToLoad);
+					}
+					else
+					{
+						if(levelToLoad == -1)
+							SceneManager.LoadScene("Sandbox");
+						else
+							SceneManager.LoadScene("S" + levelToLoad);
+					}
+				}
 			}
 		}
 	}

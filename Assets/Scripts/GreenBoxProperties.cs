@@ -24,7 +24,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 	private float duration = 2;
 	private float t;
 	//private float tt;
-	private bool fadeOut;
+	private bool fading;
     //private bool fadeIn;
 	
     private YellowBoxProperties connectedSticky;
@@ -47,7 +47,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 			rig.WakeUp();
 		}
 		// Fade out and destroy this object if its done for
-		if (fadeOut == true)
+		if (fading == true)
 		{
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
@@ -95,7 +95,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 	/// </summary>
 	public void DestroyBox(bool playSound)
 	{
-		if (fadeOut == false)
+		if (fading == false)
 		{
             if (connectedSticky != null)
                 connectedSticky.DestroyFJConnections();
@@ -116,7 +116,7 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 			ms[1] = Resources.Load<Material>("Materials/Cube " + color);
 			mr.materials = ms;
 
-			fadeOut = true;
+			fading = true;
 			boxCol.enabled = false;
 			rig.useGravity = false;
 			rig.velocity = Vector3.zero;
@@ -143,5 +143,10 @@ public class GreenBoxProperties : MonoBehaviour, IBoxProperties
 	public bool LeftStartBox()
 	{
 		return leftStartBox;
+	}
+
+	public bool Fading()
+	{
+		return fading;
 	}
 }

@@ -6,10 +6,9 @@ using UnityEngine;
 public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 {
 	// Get components 
-	// Todo: add sounds back
-	//public AudioSource leaveSound;
-	//public AudioSource hum;
-	//public AudioSource desSound;
+	public AudioSource leaveSound;
+	public AudioSource hum;
+	public AudioSource desSound;
 	private Rigidbody rig;
 	private BoxCollider boxCol;
 	private MeshRenderer mr;
@@ -24,18 +23,18 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 	// For fading out
 	private float duration = 2;
 	private float t;
-	private bool fade;
+	private bool fading;
 
 	private YellowBoxProperties connectedSticky;
 
 	public bool black = true;
-	public float strength = 1;
+	public float strength = 230;
 	public float distance = 5;
 	private SphereCollider sCol;
 	private List<Rigidbody> boxList = new List<Rigidbody>();
 
 	private const float SCALE_FACTOR = 13;
-	private const float DRAG_TIME = .5f;
+	private const float DRAG_TIME = .4f;
 
 	void OnEnable()
 	{
@@ -54,7 +53,7 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 	void FixedUpdate()
 	{
 		// Fade out and destroy self
-		if (fade == true)
+		if (fading == true)
 		{
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
@@ -88,8 +87,8 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 	{
 		if (dontPlaySound == false)
 		{
-			//leaveSound.Play();
-			//hum.Play();
+			leaveSound.Play();
+			hum.Play();
 		}
 		rig.useGravity = false;
 		leftStartBox = true;
@@ -100,12 +99,12 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 	/// </summary>
 	public void DestroyBox(bool playSound)
 	{
-		if (fade == false)
+		if (fading == false)
 		{
 			if (connectedSticky != null)
 				connectedSticky.DestroyFJConnections();
-			//if (playSound == true)
-			//desSound.Play();
+			if (playSound == true)
+				desSound.Play();
 			InteractableObject io = this.GetComponent<InteractableObject>();
 			if (io != null)
 			{
@@ -115,10 +114,11 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 
 			Material[] ms = new Material[2];
 			ms[0] = Resources.Load<Material>("Materials/Cube Rim");
-			ms[1] = Resources.Load<Material>("Materials/Cube Black");
+			ms[1] = Resources.Load<Material>("Materials/Cube " + this.BoxTypeString());
 			mr.materials = ms;
 
-			fade = true;
+			fading = true;
+			rig.useGravity = false;
 			boxCol.enabled = false;
 			rig.velocity = Vector3.zero;
 			rig.AddTorque(new Vector3(UnityEngine.Random.Range(-5000, 5000), UnityEngine.Random.Range(-5000, 5000), UnityEngine.Random.Range(-5000, 5000)));
@@ -144,7 +144,7 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 	private void Update()
 	{
 		// If in start box or dying 
-		if (leftStartBox == false || fade == true) 
+		if (leftStartBox == false || fading == true) 
 			return;
 
 		// Gravity pull
@@ -152,12 +152,15 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 		{
 			if (r == null)
 				continue;
+			if(r.GetComponent<IBoxProperties>().Fading() == true)
+				continue;
+
 			float pull = Vector3.Distance(this.transform.position, r.transform.position);
 			pull = Mathf.Abs(pull - distance) * strength;
-			if(black == true)
-				r.GetComponent<Rigidbody>().AddForce((this.transform.position- r.position) * pull);
+			if (black == true)
+				r.GetComponent<Rigidbody>().AddForce((this.transform.position - r.position) * pull * Time.deltaTime);
 			else
-				r.GetComponent<Rigidbody>().AddForce((r.position - this.transform.position) * pull);
+				r.GetComponent<Rigidbody>().AddForce((r.position - this.transform.position) * pull * Time.deltaTime);
 		}
 
 		// Todo: This is lame because it will keep setting the drag to 0 for forever 
@@ -184,11 +187,19 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 				Rigidbody r = other.GetComponent<Rigidbody>();
 				if (boxList.Contains(r) == false)
 				{
+					// Check if we are interacting with another black/white box. If we are 
+					// check if its the opposite. If so return to ignore the opposite color 
+					BlackWhiteBoxProperties boxProp = other.GetComponent<BlackWhiteBoxProperties>();
+					if (boxProp != null && this.BoxTypeString() != boxProp.BoxTypeString())
+						return;
+
+					// Add to list that will effect gravity 
 					boxList.Add(r);
+					// Drag
 					if (this.InBoxInfoList(r) == false)
 					{
 						// We dont want to mess with the drag of other black/white boxes 
-						if (other.GetComponent<BlackWhiteBoxProperties>() == null)
+						if (boxProp == null)
 						{
 							Debug.Log("Start Drag");
 							dragList.Add(new BoxTimerInfo(r, DRAG_TIME));
@@ -237,6 +248,16 @@ public class BlackWhiteBoxProperties : MonoBehaviour, IBoxProperties
 	public bool LeftStartBox()
 	{
 		return leftStartBox;
+	}
+	
+	public string BoxTypeString()
+	{
+		return black == true ? "Black" : "White";
+	}
+
+	public bool Fading()
+	{
+		return fading;
 	}
 }
 

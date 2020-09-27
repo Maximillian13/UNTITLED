@@ -28,7 +28,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 	// For fading out
 	private float duration = 2;
 	private float t;
-	private bool fade;
+	private bool fading;
 
     private YellowBoxProperties connectedSticky;
 
@@ -41,6 +41,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 		startingPosition = this.transform.position;
 		//hands = GameObject.FindWithTag("Hands").transform;
 		numbersSprites = this.GetComponentsInChildren<SpriteRenderer>();
+		comeBackTimer = float.MaxValue;
 	}
 
 	void FixedUpdate()
@@ -49,8 +50,18 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 		{
 			if (hands != null) // If it has a hand to come back to
 			{
+				//if (Time.time > comeBackTimer + 1.5f)
+				//{
+				//	float handBoxDist = Vector3.Distance(this.transform.position, hands.position);
+				//	if (handBoxDist < 1)
+				//		rig.drag = Mathf.Abs(1 - handBoxDist) * 100; 
+				//	rig.AddForce((hands.position - this.transform.position) * 200 * Time.deltaTime);
+				//}
+
+
 				Vector3 direction = hands.position - this.transform.position;
 				this.rig.MovePosition(this.transform.position + direction * strengthMultiplyer * Time.deltaTime);
+
 
 				if (Time.time > comeBackTimer + timer) // Se the velocity back to 0 so the cube can return to the player
 				{
@@ -61,7 +72,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 		}
 
 		// Fade out and destroy self
-		if (fade == true)
+		if (fading == true)
 		{
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
@@ -81,7 +92,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 		{
 			float curDist = Vector3.Distance(startingPosition, this.transform.position);
 			if (curDist > 200)
-				DestroyBox(false);
+				this.DestroyBox(false);
 			counter = 0;
 		}
 		counter++;
@@ -97,6 +108,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 			leaveSound.Play();
 			hum.Play();
 		}
+		leftStartBox = true;
 		rig.useGravity = false;
 		active = true;
 	}
@@ -108,7 +120,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 	{
         if (connectedSticky != null)
             connectedSticky.DestroyFJConnections();
-        if (fade == false)
+        if (fading == false)
 		{
 			if (playSound == true)
 				desSound.Play();
@@ -125,7 +137,7 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 			ms[1] = Resources.Load<Material>("Materials/Cube LightBlue");
 			mr.materials = ms;
 
-			fade = true;
+			fading = true;
 			rig.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ;
 			boxCol.enabled = false;
 			rig.velocity = Vector3.zero;
@@ -139,11 +151,14 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 		if (wand != null)
 			hands = wand;
 		comeBackTimer = Time.time;
+		this.rig.drag = 0;
 		return;
 	}
 
 	public void OnBoxGrab()
 	{
+		comeBackTimer = float.MaxValue;
+		this.rig.drag = 0;
 		return;
 	}
 
@@ -156,5 +171,10 @@ public class LightBlueBoxProperties : MonoBehaviour, IBoxProperties
 	public bool LeftStartBox()
 	{
 		return leftStartBox;
+	}
+
+	public bool Fading()
+	{
+		return fading;
 	}
 }

@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Box
+  - BoxChecker
+  - Table
+  - Ground
+  - Hands
+  - BoxButton
   layers:
   - Default
   - TransparentFX

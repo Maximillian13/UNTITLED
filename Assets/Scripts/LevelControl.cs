@@ -14,27 +14,42 @@ public class LevelControl : MonoBehaviour
 	private float fadingWhiteTimer;
 	private EyeFadeControl eyeFade;
 
+	public bool specail;
+	private int forceLevel = -1;
+
 	void Start()
 	{
 		// Update the player pref if the player is further than they have been
 		int currentLevel = SceneManager.GetActiveScene().buildIndex;
 		int ppLevel = PlayerPrefs.GetInt("Level");
 
-        if (currentLevel > ppLevel)
-            PlayerPrefs.SetInt("Level", currentLevel);
+		if (currentLevel > ppLevel)
+			PlayerPrefs.SetInt("Level", currentLevel);
 	}
 
 	// Update is called once per frame
-	void Update ()
+	void Update()
 	{
-        //Todo: Dev Stuff
-        //if (Input.GetKeyDown(KeyCode.L))
-        //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-        //if (Input.GetKeyDown(KeyCode.P))
-        //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+		if(specail == true)
+		{
+			if (forceLevel != -1)
+			{
+				// Get and start fade
+				if (eyeFade == null)
+				{
+					eyeFade = GameObject.Find("[CameraRig]").transform.Find("Camera").Find("EyeCover").GetComponent<EyeFadeControl>();
+					eyeFade.FadeWhite();
+				}
 
-        // Check the receptacles and if they are not all complete return out of the method
-        for (int x = 0; x < recepticles.Length; x++)
+				// After fade load level
+				fadingWhiteTimer += Time.deltaTime;
+				if (fadingWhiteTimer > .6f)
+					SceneManager.LoadScene(forceLevel);
+			}
+			return;
+		}
+		// Check the receptacles and if they are not all complete return out of the method
+		for (int x = 0; x < recepticles.Length; x++)
 		{
 			if (multiRecepticle == false)
 			{
@@ -50,7 +65,7 @@ public class LevelControl : MonoBehaviour
 
 		multiRecDone = true;
 
-		if(multiRecepticle == true)
+		if (multiRecepticle == true)
 		{
 			timer += Time.deltaTime;
 			if (timer < 2)
@@ -58,12 +73,12 @@ public class LevelControl : MonoBehaviour
 		}
 
 		// Get and start fade
-		if(eyeFade == null)
+		if (eyeFade == null)
 		{
 			eyeFade = GameObject.Find("[CameraRig]").transform.Find("Camera").Find("EyeCover").GetComponent<EyeFadeControl>();
 			eyeFade.FadeWhite();
 		}
-		
+
 		// After fade load level
 		fadingWhiteTimer += Time.deltaTime;
 		if (fadingWhiteTimer > .6f)
@@ -75,8 +90,6 @@ public class LevelControl : MonoBehaviour
 			else
 				SceneManager.LoadScene(nextScene - 1);
 		}
-
-
 	}
 
 
@@ -88,5 +101,16 @@ public class LevelControl : MonoBehaviour
 	public bool GetMultiRecDone()
 	{
 		return multiRecDone;
+	}
+
+	public void ForceLoadLevel(int levelToLoad, bool killMusic = false)
+	{
+		if(killMusic == true)
+		{
+			GameObject music = GameObject.Find("Music");
+			if (music != null)
+				Destroy(music.gameObject);
+		}
+		forceLevel = levelToLoad;
 	}
 }

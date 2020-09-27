@@ -30,6 +30,7 @@ public class WandControlGeneralInteraction : MonoBehaviour
 	// This is a hash-set of all the objects that this wand is interacting with Hash-sets are like lists but with no duplicates inside of it
 	private SteamVR_Input_Sources hand;
 	private HashSet<InteractableObject> hoveredObject = new HashSet<InteractableObject>();
+	private CubeButton button;
 	private InteractableObject interactingItem;
 
 	private Animator anim;
@@ -81,6 +82,9 @@ public class WandControlGeneralInteraction : MonoBehaviour
 				cubeColor = interactingItem.GetCubeColor().color;
 			}
 		}
+
+		if (SteamVR_Actions._default.TriggerClick.GetStateDown(hand) && button != null)
+			button.PressButton();
 
 		// If you release the trigger button
 		if (SteamVR_Actions._default.TriggerClick.GetStateUp(hand))
@@ -173,12 +177,16 @@ public class WandControlGeneralInteraction : MonoBehaviour
         InteractableObject collidedObject = other.GetComponent<InteractableObject>();
         // Set it up to be carried
         if(collidedObject != null && other.GetType() != typeof(SphereCollider))
-        {
             hoveredObject.Add(collidedObject);
-        }
     }
 
-    void OnTriggerExit(Collider other)
+	private void OnTriggerStay(Collider other)
+	{
+		if (other.tag == "BoxButton")
+			button = other.GetComponent<CubeButton>();
+	}
+
+	void OnTriggerExit(Collider other)
     {
         // Find what its touching
         InteractableObject collidedObject = other.GetComponent<InteractableObject>();
@@ -188,5 +196,11 @@ public class WandControlGeneralInteraction : MonoBehaviour
             // Set the color to be un-highlighted
             hoveredObject.Remove(collidedObject);
         }
-    }
+
+		CubeButton cb = other.GetComponent<CubeButton>();
+		if (cb != null)
+		{
+			button = null;
+		}
+	}
 }

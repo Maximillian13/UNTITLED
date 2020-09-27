@@ -12,6 +12,13 @@ public class LastLevelControl : MonoBehaviour
 	// Use this for initialization
 	void Start () {
 		timer = float.MaxValue;
+
+		// Update the player pref if the player is further than they have been
+		int currentLevel = SceneManager.GetActiveScene().buildIndex;
+		int ppLevel = PlayerPrefs.GetInt("Level");
+
+		if (currentLevel > ppLevel)
+			PlayerPrefs.SetInt("Level", currentLevel);
 	}
 	
 	// Update is called once per frame
@@ -20,8 +27,9 @@ public class LastLevelControl : MonoBehaviour
 		if (Time.time > timer)  // load the next level
 			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
 
-        if (lastLevel == true && endTimer >= 20) // Quit the game after 20 seconds
-            Application.Quit();
+		if (lastLevel == true && endTimer >= 20) // Quit the game after 20 seconds
+			SceneManager.LoadScene(0);
+			//Application.Quit();
 
 		endTimer += Time.deltaTime;
 	}

@@ -25,7 +25,7 @@ public class RedBoxProperties : MonoBehaviour, IBoxProperties
 	private float duration = 2;
 	float t;
 
-	private bool fade;
+	private bool fading;
 
     private YellowBoxProperties connectedSticky;
 
@@ -48,7 +48,7 @@ public class RedBoxProperties : MonoBehaviour, IBoxProperties
 			rig.AddForce(antiGrav);
 
 		// If the box is being destroyed have it fade out
-		if (fade == true)
+		if (fading == true)
 		{
 			float a = Mathf.Lerp(1, 0, t / duration);
 			mr.materials[0].color = new Color(mr.materials[0].color.r, mr.materials[0].color.g, mr.materials[0].color.b, a);
@@ -95,7 +95,7 @@ public class RedBoxProperties : MonoBehaviour, IBoxProperties
 	/// </summary>
 	public void DestroyBox(bool playSound)
 	{
-		if (fade == false)
+		if (fading == false)
 		{
             if (connectedSticky != null)
                 connectedSticky.DestroyFJConnections();
@@ -114,7 +114,8 @@ public class RedBoxProperties : MonoBehaviour, IBoxProperties
 			ms[1] = Resources.Load<Material>("Materials/Cube Red");
 			mr.materials = ms;
 
-			fade = true;
+			fading = true;
+			rig.useGravity = false;
 			boxCol.enabled = false;
 			active = false;
 			rig.velocity = Vector3.zero;
@@ -141,5 +142,10 @@ public class RedBoxProperties : MonoBehaviour, IBoxProperties
 	public bool LeftStartBox()
 	{
 		return leftStartBox;
+	}
+
+	public bool Fading()
+	{
+		return fading;
 	}
 }
